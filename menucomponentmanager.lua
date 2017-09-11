@@ -7,12 +7,6 @@ local box_height = 128
 local icon_size = 32
 local padding = 10
 
-local function make_fine_text(text)
-	local x, y, w, h = text:text_rect()
-	text:set_size(w, h)
-	text:set_position(math.round(text:x()), math.round(text:y()))
-end
-
 function BLTMod:HasModImage()
 	-- suppress image loading
 	return false
@@ -69,13 +63,13 @@ function BLTModItem:init(panel, index, mod, ...)
 	-- 1. the "no image" box and
 	-- 2. the 4 white corners - their alignments are set to "grow", so they got stretched by the box resizing
 	-- also check if there are icons
-	local has_icons
+	local icons = 0
 	for _, child in pairs(self._panel:children()) do
 		if alive(child) then
 			if child.type_name == "Panel" then
 				self._panel:remove(child)
 			elseif child.type_name == "Bitmap" and child.texture ~= "guis/textures/test_blur_df" then -- ignore the background
-				has_icons = true
+				icons = icons + 1
 			end
 		end
 	end
@@ -83,48 +77,24 @@ function BLTModItem:init(panel, index, mod, ...)
 	-- recreate the white corners with correct size
 	BoxGuiObject:new(self._panel, {sides = {1, 1, 1, 1}})
 
+	-- remove desciption panel
+	local mod_desc = self._panel:child("mod_desc")
+	if mod_desc then
+		self._panel:remove(mod_desc)
+	end
+
 	-- fix text positions / sizes
 	local mod_name = self._panel:child("mod_name")
-	local mod_desc = self._panel:child("mod_desc")
-	if mod_name and mod_desc then
+	if mod_name then
 
 		-- fix width (prevent overlapping with icons)
-		if has_icons then
-			local w = self._panel:w() - padding * 4 - icon_size * 2
-			mod_name:set_w(w)
-			mod_desc:set_w(w)
+		if icons > 1 then
+			mod_name:set_w(self._panel:w() - padding * 4 - icon_size * 2)
 		end
 
-		-- truncate title text
-		local name = mod:GetName()
-		local max_len = 18
-		if name:len() > max_len then
-			name = name:sub(1, max_len) .. ".."
-		end
-		mod_name:set_text(name)
-		mod_name:set_align("center")
-
-		-- truncate description text and remove line breaks
-		local desc = mod:GetDescription():gsub("\n", " ")
-		local max_len = 95
-		if desc:len() > max_len then
-			desc = desc:sub(1, max_len) .. "..."
-		end
-		mod_desc:set_text(desc)
-		mod_desc:set_align("center")
-
-		-- refresh sizes
-		make_fine_text(mod_name)
-		make_fine_text(mod_desc)
-
-		-- center x
+		-- center
 		mod_name:set_center_x(self._panel:w() * 0.5)
-		mod_desc:set_center_x(self._panel:w() * 0.5)
-
-		-- center y
-		local full_height = mod_name:h() + mod_desc:h() + 5
-		mod_name:set_top((self._panel:h() - full_height) * 0.5)
-		mod_desc:set_top(mod_name:bottom() + 5)
+		mod_name:set_center_y(self._panel:h() * 0.5)
 
 	end
 
