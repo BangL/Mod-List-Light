@@ -92,6 +92,12 @@ function BLTModItem:init(panel, index, mod, ...)
 			mod_name:set_w(self._panel:w() - padding * 4 - icon_size * 2)
 		end
 
+		-- fix height
+		mod_name:set_h(self._panel:h() - padding * 2)
+
+		-- center text
+		mod_name:set_vertical("center")
+
 		-- center
 		mod_name:set_center_x(self._panel:w() * 0.5)
 		mod_name:set_center_y(self._panel:h() * 0.5)
