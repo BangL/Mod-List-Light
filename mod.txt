@@ -8,7 +8,7 @@
 	"color" : "255 0 255",
 	"updates" : [
 		{
-			"identifier" : "mll",
+			"identifier" : "mll"
 		}
 	],
 	"hooks" : [
