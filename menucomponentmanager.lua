@@ -2,6 +2,7 @@
 local BLTUIButton_init = BLTUIButton.init
 local BLTModItem_init = BLTModItem.init
 local BLTDownloadControl_init = BLTDownloadControl.init
+local BLTModsGui_setup = BLTModsGui._setup
 
 local box_height = 128
 local icon_size = 32
@@ -45,10 +46,10 @@ function BLTUIButton:init(panel, parameters, ...)
 	return result
 end
 
-function BLTModItem:init(panel, index, mod, ...)
+function BLTModItem:init(panel, index, ...)
 
 	-- let the item be generated
-	local result = BLTModItem_init(self, panel, index, mod, ...)
+	local result = BLTModItem_init(self, panel, index, ...)
 
 	-- fix box positioning
 	local w = (panel:w() - (self.layout.x + 1) * padding) / self.layout.x
@@ -77,7 +78,7 @@ function BLTModItem:init(panel, index, mod, ...)
 	-- recreate the white corners with correct size
 	BoxGuiObject:new(self._panel, {sides = {1, 1, 1, 1}})
 
-	-- remove desciption panel
+	-- remove description panel
 	local mod_desc = self._panel:child("mod_desc")
 	if mod_desc then
 		self._panel:remove(mod_desc)
@@ -107,10 +108,10 @@ function BLTModItem:init(panel, index, mod, ...)
 	return result
 end
 
-function BLTDownloadControl:init(panel, parameters, ...)
+function BLTDownloadControl:init(...)
 
 	-- let the control be generated
-	local result = BLTDownloadControl_init(self, panel, parameters, ...)
+	local result = BLTDownloadControl_init(self, ...)
 
 	-- scan for the "no image" panel and remove it
 	for _, child in pairs(self._info_panel:children()) do
@@ -119,9 +120,9 @@ function BLTDownloadControl:init(panel, parameters, ...)
 		end
 	end
 
-	-- fix download info position/ size
+	-- fix download info position & size
 	local title = self._info_panel:child("title")
-	local state = self._info_panel:child("state") or self._panel:child("state") -- blt bug fix
+	local state = self._info_panel:child("state") or self._panel:child("state") -- temporary blt bug fix for this: https://github.com/JamesWilko/Payday-2-BLT-Lua/commit/fa575be5bc13a8caa57a86a557d85819ab082800
 	local download_progress = self._info_panel:child("download_progress")
 	for _, obj in pairs({title, state, download_progress}) do
 		if alive(obj) then
@@ -131,4 +132,36 @@ function BLTDownloadControl:init(panel, parameters, ...)
 	end
 
 	return result
+end
+
+function BLTModsGui:_setup(...)
+
+	-- Get mod list
+	local mods = BLT.Mods:Mods()
+
+	-- Take BLT base mod out of the list
+	local blt_mod
+	for key, mod in pairs(mods) do
+		if mod:GetId() == "base" then
+			blt_mod = table.remove(mods, key)
+			break
+		end
+	end
+
+	-- Sort mod list
+	table.sort(mods, function(a, b)
+		return a:GetName():lower() < b:GetName():lower()
+	end)
+
+	-- Recreate mod list
+	local sorted_mods = {}
+	table.insert(sorted_mods, blt_mod)
+	for _, mod in pairs(mods) do
+		table.insert(sorted_mods, mod)
+	end
+
+	-- Replace mod list
+	BLT.Mods.mods = sorted_mods
+
+	return BLTModsGui_setup(self, ...)
 end
