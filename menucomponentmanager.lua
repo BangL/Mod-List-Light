@@ -122,7 +122,7 @@ function BLTDownloadControl:init(...)
 
 	-- fix download info position & size
 	local title = self._info_panel:child("title")
-	local state = self._info_panel:child("state") or self._panel:child("state") -- temporary blt bug fix for this: https://github.com/JamesWilko/Payday-2-BLT-Lua/commit/fa575be5bc13a8caa57a86a557d85819ab082800
+	local state = self._info_panel:child("state")
 	local download_progress = self._info_panel:child("download_progress")
 	for _, obj in pairs({title, state, download_progress}) do
 		if alive(obj) then
